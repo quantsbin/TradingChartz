@@ -19,6 +19,8 @@ fig.update_layout(xaxis_rangeslider_visible=False)
 print(data.columns)
 print(data.index)
 
+
+
 app = dash.Dash()
 app.layout = html.Div(children=[
     html.H1(children='Hello Dash'),
