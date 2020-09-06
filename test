@@ -1,0 +1,11 @@
+from nsepy import get_history
+from datetime import date, timedelta
+
+end_day = date.today()
+start_day = end_day - timedelta(10)
+
+def nse_stock():
+        df = get_history(symbol='TCS', start=start_day, end=end_day)
+        print(df)
+
+nse_stock()
