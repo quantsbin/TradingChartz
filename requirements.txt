@@ -4,4 +4,8 @@ dash_bootstrap_components
 dash_html_components
 plotly
 nsepy
+<<<<<<< HEAD
 nsetool
+=======
+nsetools
+>>>>>>> squash! test
