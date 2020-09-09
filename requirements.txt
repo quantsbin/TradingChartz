@@ -5,4 +5,5 @@ dash_html_components
 plotly
 nsepy
 nsetools
+gunicorn
 
