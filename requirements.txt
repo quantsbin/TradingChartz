@@ -1,0 +1,7 @@
+pandas
+dash
+dash_bootstrap_components
+dash_html_components
+plotly
+nsepy
+nsetool

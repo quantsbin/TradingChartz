@@ -46,6 +46,11 @@ class NSEPyData(object):
 
     @staticmethod
     def get_index_constituents(index_name: str) -> pd.DataFrame:
+        """
+        Returns the pandas dataframe with list of constituents of index on the recent re-balancing date.
+        :param index_name: str - use get_symbol_list to view index names. Currently working on only broader market index.
+        :return: Returns the pandas dataframe with list of constituents of index on the recent re-balancing date.
+        """
         index_formatted = ''.join(index_name.split()).lower()
         index_path = broader_indices_path.format(index_formatted)
         return ws.read_csv_from_web_as_df(index_path)
@@ -54,6 +59,13 @@ class NSEPyData(object):
     def historical_stock_close_price(symbol: str,
                                      start_date: dt.date,
                                      end_date: dt.date = dt.date.today()) -> pd.DataFrame:
+        """
+
+        :param symbol:
+        :param start_date:
+        :param end_date:
+        :return:
+        """
         NSEPyData()
         return NSEPyData.nsepy.get_history(symbol,
                                            start_date,
