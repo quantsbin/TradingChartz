@@ -8,14 +8,14 @@ import datetime as dt
 
 from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
 
-# data = NSEPyData.historical_stock_close_price('sbin', dt.date(2015, 1, 1), dt.date.today())
-# fig = go.Figure(data=[go.Candlestick(x=data.index,
-#                 open=data['Open'],
-#                 high=data['High'],
-#                 low=data['Low'],
-#                 close=data['Close'])],
-#                 layout=dict(xaxis={'type': 'category'},
-#                             height=600))
+data = NSEPyData.historical_stock_close_price('sbin', dt.date(2015, 1, 1), dt.date.today())
+fig = go.Figure(data=[go.Candlestick(x=data.index,
+                open=data['Open'],
+                high=data['High'],
+                low=data['Low'],
+                close=data['Close'])],
+                layout=dict(xaxis={'type': 'category'},
+                            height=600))
 fig.update_layout(xaxis_rangeslider_visible=False)
 print(data.columns)
 print(data.index)
@@ -30,10 +30,10 @@ app.layout = html.Div(children=[
     dbc.DropdownMenu(
         label="Select stock", direction="down"
     ),
-    # dcc.Graph(
-    #     id='example-graph',
-    #     figure=fig
-    # )
+    dcc.Graph(
+        id='example-graph',
+        figure=fig
+    )
 ])
 
 if __name__ == '__main__':
