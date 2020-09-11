@@ -1,11 +1,21 @@
 from nsepy import get_history
 from datetime import date, timedelta
 
+from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
+
 end_day = date.today()
 start_day = end_day - timedelta(10)
 
 def nse_stock():
-        df = get_history(symbol='TCS', start=start_day, end=end_day)
-        print(df)
+        df = NSEPyData.historical_stock_close_price(symbol='TCS',
+                                                    start_date=start_day,
+                                                    end_date=end_day)
+        print(df.head())
 
-nse_stock()
+# print()
+
+print(NSEPyData.get_symbol_list('index')['Codes'].to_list())
+
+print(NSEPyData.get_index_constituents('NIFTY BANK').head().T)
+
+print(nse_stock())
