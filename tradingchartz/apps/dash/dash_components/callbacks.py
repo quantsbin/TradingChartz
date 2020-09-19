@@ -1,6 +1,8 @@
 # external standard
 import datetime as dt
-from typing import Any
+import pandas as pd
+
+from typing import Any, List
 
 # dash imports
 from dash.dependencies import Input, Output
@@ -11,6 +13,7 @@ import plotly.graph_objects as go
 import tradingchartz.apps.dash.helpers.helper_functions as hf
 import tradingchartz.apps.dash.dash_components.charts_and_tables as cts
 from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
+from tradingchartz.src.signal_generator import SignalGenerator
 
 
 def register_main_page_callbacks(app: Any) -> Any:
@@ -46,11 +49,43 @@ def register_main_page_callbacks(app: Any) -> Any:
         return df.to_json(orient='index', date_format='iso')
 
     @app.callback(
-        Output('stock-ohlc-chart', 'figure'),
+        Output('stock-pattern-data', 'data'),
         [
-            Input('stock-ohlcv-data', 'data')
+            Input('stock-ohlcv-data', 'data'),
+            Input('selected-candle-pattern-dropdown', 'value')
         ]
     )
-    def generate_ohlc_graph(stock_ohlcv_data: str) -> go.Figure():
+    def calculate_pattern_signals(stock_ohlcv_data: str,
+                                  pattern_list: List) -> pd.DataFrame:
         stock_ohlcv_df = hf.df_from_jason(stock_ohlcv_data)
-        return cts.generate_ohlc_graph(stock_ohlcv_df)
+        empty_jason = pd.DataFrame().to_json(orient='index')
+        if pattern_list is None:
+            return empty_jason
+        sg = SignalGenerator(stock_ohlcv_df)
+        _pattern_sr_dict = {}
+        for pattern in pattern_list:
+            try:
+                _pattern_sr_dict[pattern] = sg.raw_candle_pattern(pattern)
+            except:
+                pass
+        if not _pattern_sr_dict:
+            return empty_jason
+        pattern_df = pd.concat(_pattern_sr_dict.values(), axis=1, keys=_pattern_sr_dict.keys())
+        return pattern_df.to_json(orient='index', date_format='iso')
+
+    @app.callback(
+        Output('stock-ohlc-chart', 'figure'),
+        [
+            Input('stock-ohlcv-data', 'data'),
+            Input('stock-pattern-data', 'data')
+        ]
+    )
+    def generate_ohlc_graph(stock_ohlcv_data: str,
+                            stock_pattern_data: str) -> go.Figure():
+        stock_ohlcv_df = hf.df_from_jason(stock_ohlcv_data)
+        stock_pattern_df = hf.df_from_jason(stock_pattern_data)
+        fig = go.Figure()
+        if not stock_pattern_df.empty:
+            fig = cts.add_signals_to_chart(fig, stock_pattern_df, stock_ohlcv_df)
+        fig = cts.generate_ohlc_graph(fig, stock_ohlcv_df)
+        return fig

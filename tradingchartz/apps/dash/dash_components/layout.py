@@ -59,24 +59,29 @@ layout_top_bars = dbc.Col(
         ]),
         className="w-100"), width=11)
 
+layout_main_side_body = dbc.Card(
+    [
+        dbc.CardHeader("Indicators"),
+        dbc.CardBody(
+            [
+                dbc.Label("Select Candle Pattern"),
+                dcc.Dropdown(id='selected-candle-pattern-dropdown',
+                             options=[{'label': symbol, 'value': symbol} for symbol in de.CANDLE_PATTERNS],
+                             # value,
+                             placeholder="Select Pattern",
+                             clearable=False,
+                             multi=True,
+                             style=dict(width='100%'))
+            ]
+            )
+    ], className="w-100")
 
-layout_side_bar = [
-    dbc.Row(),  # TODO: Add indicator selector
-    dbc.Row(),  # TODO: Add charting options
-    dbc.Row(),  # TODO: Add parameter in
-]
+layout_main_charting_body = dbc.Card(
+    [dbc.CardHeader("Stock Name and other information"),
+     dbc.CardBody([dcc.Graph(id='stock-ohlc-chart')])
+     ], className="w-100")
 
-layout_main_charting_body = [
-        dbc.Col(
-            dbc.Card([dbc.CardHeader("Indicators")], className="w-100"), width=2),
-        dbc.Col(
-            dbc.Card([
-                dbc.CardHeader("Stock Name and other information"),
-                dbc.CardBody([
-                    dcc.Graph(id='stock-ohlc-chart')
-                ])
-            ], className="w-100"), width=9)
-    ]
+
 # dbc.Row(),  # TODO: Additional graphs.
 
 layout = html.Div(
@@ -85,11 +90,12 @@ layout = html.Div(
             dbc.Col(html.H1("Trading-Chartz", className="text-center")
                     , className="mb-1 mt-1")
         ]),
-        # dbc.Row([
-        #     dbc.Col(html.H5(children='Guide to Trading Signals', className="text-center"))
-        #         ]),
         dbc.Row(layout_top_bars, justify="center"),
-        dbc.Row(layout_main_charting_body, justify="center"),
+        dbc.Row(
+            [
+                dbc.Col(layout_main_side_body, width=2),
+                dbc.Col(layout_main_charting_body, width=9)
+            ], justify="center"),
         dbc.Row()  # TODO: Work on back-testing result body template.
     ] + main_store,
     className="dash-bootstrap"

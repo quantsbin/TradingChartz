@@ -6,4 +6,5 @@ plotly
 nsepy
 nsetools
 gunicorn
+TA-Lib
 
