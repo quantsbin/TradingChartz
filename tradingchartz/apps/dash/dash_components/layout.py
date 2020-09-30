@@ -9,6 +9,7 @@ import dash_html_components as html
 # internal package
 import tradingchartz.apps.dash.helpers.defaults_and_enums as de
 from tradingchartz.apps.dash.dash_components.store import main_store
+from tradingchartz.apps.dash.dash_components.charts_and_tables import triple_barrier_setter_template
 
 
 layout_top_bars = dbc.Col(
@@ -59,25 +60,42 @@ layout_top_bars = dbc.Col(
         ]),
         className="w-100"), width=11)
 
-layout_main_side_body = dbc.Card(
-    [
-        dbc.CardHeader("Indicators"),
-        dbc.CardBody(
-            [
-                dbc.Label("Select Candle Pattern"),
-                dcc.Dropdown(id='selected-candle-pattern-dropdown',
-                             options=[{'label': symbol, 'value': symbol} for symbol in de.CANDLE_PATTERNS],
-                             # value,
-                             placeholder="Select Pattern",
-                             clearable=False,
-                             multi=True,
-                             style=dict(width='100%'))
-            ]
-            )
-    ], className="w-100")
+layout_main_side_body = [
+    dbc.Card(
+        [
+            dbc.CardHeader("Indicators"),
+            dbc.CardBody(
+                [
+                    dbc.Label("Select Candle Pattern"),
+                    dcc.Dropdown(id='selected-candle-pattern-dropdown',
+                                 options=[{'label': symbol, 'value': symbol} for symbol in de.CANDLE_PATTERNS],
+                                 # value,
+                                 placeholder="Select Pattern",
+                                 clearable=False,
+                                 multi=True,
+                                 style=dict(width='100%'))
+                ]
+                ),
+        ], className="w-100"),
+    dbc.Card(
+        [
+            dbc.CardHeader(
+                dbc.Button("Triple Barrier Setter",
+                           color="link",
+                           id='collapse-triple-toggle'),
+            ),
+            dbc.Collapse(
+                 dbc.CardBody(
+                        triple_barrier_setter_template(),
+                        ), id='collapse-triple-barrier'),
+        ], className="w-100"),
+    ]
 
 layout_main_charting_body = dbc.Card(
-    [dbc.CardHeader("Stock Name and other information"),
+    [dbc.CardHeader(
+        dbc.Spinner(html.Div("Stock Name and other information", id='main-chart-header'))
+        , id='chart-underlying-header'
+        ),
      dbc.CardBody([dcc.Graph(id='stock-ohlc-chart')])
      ], className="w-100")
 
@@ -95,7 +113,7 @@ layout = html.Div(
             [
                 dbc.Col(layout_main_side_body, width=2),
                 dbc.Col(layout_main_charting_body, width=9)
-            ], justify="center"),
+            ], justify="center", no_gutters=True),
         dbc.Row()  # TODO: Work on back-testing result body template.
     ] + main_store,
     className="dash-bootstrap"

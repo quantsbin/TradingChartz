@@ -3,13 +3,13 @@ from datetime import date, timedelta
 import pandas as pd
 
 from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
-from tradingchartz.src.backtesting.triple_barrier import triple_barrier_labels, TripleBarrier
+from tradingchartz.src.backtesting.triple_barrier import TripleBarrier, TripleBarrierCalculator, TripleBarrierSetter
 
 end_day = date.today()
-start_day = end_day - timedelta(2400)
+start_day = end_day - timedelta(250)
 
 def nse_stock():
-        df = NSEPyData.historical_stock_close_price(symbol='TCS',
+        df = NSEPyData.historical_stock_close_price(symbol='SBIN',
                                                     start_date=start_day,
                                                     end_date=end_day)
         return df
@@ -23,21 +23,28 @@ df = nse_stock()
 
 import talib
 
-output = talib.CDL3LINESTRIKE(df.Open, df.High, df.Low, df.Close)
+output = talib.CDLDOJI(df.Open, df.High, df.Low, df.Close)
 # print(df)
 # print(output.head())
 output = output[output.values>0]
 # output['entry_price'] = df.shift(-1).loc[output.index, 'Open']
-print(type(output))
+print(output.head())
 
-test = output.to_frame(name='signals')
-test['entry_price'] = df.shift(-1).loc[output.index, 'Open']
-print(df.loc[date(2017, 1, 16), 'Open'])
-print(test)
+# test = output.to_frame(name='signals')
+# test['entry_price'] = df.shift(-1).loc[output.index, 'Open']
+# print(df.loc[date(2017, 1, 16), 'Open'])
+# print(test)
 
-triple_barrier = TripleBarrier(.1, .05, None)
-barrier_output = triple_barrier_labels(df, output, triple_barrier)
-print(barrier_output.T)
+
+triple_barrier = TripleBarrierSetter(.05, .05, 20)
+triple_test = TripleBarrierCalculator(triple_barrier,
+                                      df,
+                                      output)
+
+print(triple_test.df_signal_with_barrier.T)
+print(triple_test.df_triple_barrier_details.T)
+print(triple_test.get_triple_barrier_summary(triple_test.df_triple_barrier_details))
+
 
 
 

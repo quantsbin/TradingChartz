@@ -5,6 +5,7 @@ import datetime as dt
 # external dash
 import plotly.graph_objects as go
 import plotly.express as px
+import dash_bootstrap_components as dbc
 
 # internal import
 import tradingchartz.apps.dash.helpers.helper_functions as hf
@@ -13,7 +14,7 @@ import tradingchartz.apps.dash.helpers.helper_functions as hf
 def generate_ohlc_graph(fig,
                         df) -> go.Figure:
     fig.add_trace(
-        go.Candlestick(x=df.index.date,
+        go.Ohlc(x=df.index.date,
                        open=df['Open'],
                        high=df['High'],
                        low=df['Low'],
@@ -86,3 +87,22 @@ def add_signals_to_chart(fig: go.Figure,
                 )
             )
     return fig
+
+
+def triple_barrier_setter_template():
+    return [dbc.Row(
+                [
+                    dbc.Col(dbc.Label("Upper Barrier")),
+                    dbc.Col(dbc.Input(id="tb-upper", placeholder="Profit Booking", type="float")),
+                ], no_gutters=True),
+            dbc.Row(
+                [
+                    dbc.Col(dbc.Label("Lower Barrier")),
+                    dbc.Col(dbc.Input(id="tb-lower", placeholder="Stop Loss", type="float")),
+                ], no_gutters=True),
+            dbc.Row(
+                [
+                    dbc.Col(dbc.Label("Vertical Barrier")),
+                    dbc.Col(dbc.Input(id="tb-vertical", placeholder="Time Horizon", type="float")),
+                ], no_gutters=True),
+            ]
