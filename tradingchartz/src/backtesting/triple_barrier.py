@@ -28,7 +28,7 @@ class TripleBarrierCalculator:
     def __init__(self,
                  triple_barrier: TripleBarrierSetter,
                  df_OHLCV: pd.DataFrame,
-                 sr_signal: pd.DataFrame,
+                 sr_signal: pd.DataFrame = None,
                  triple_barrier_config: TripleBarrierConfig = DEFAULT_TB_CONFIG
                  ):
         """
@@ -44,11 +44,13 @@ class TripleBarrierCalculator:
 
     @property
     def df_signal_with_barrier(self):
+        if self.sr_signal is None:
+            raise ValueError("Please set the sr_signal value")
         df_temp_signal = self.sr_signal.to_frame(name='signals')
         df_temp_signal['entry_price'] = self.df_OHLCV.shift(-1).loc[self.df_OHLCV.index,
                                                                     DEFAULT_TB_CONFIG.entry_point_field]
-        df_temp_signal[self.triple_barrier.price_move_field] = self.df_OHLCV.loc[df_temp_signal.index,
-                                                                                 self.triple_barrier.price_move_field]
+        df_temp_signal[self.triple_barrier.price_move_field] = self.df_OHLCV.shift(-1).loc[df_temp_signal.index,
+                                                                                self.triple_barrier.price_move_field]
         # Barrier level calculations
         if self.triple_barrier.lower:
             df_temp_signal['lower_barrier'] = df_temp_signal['entry_price'] \
@@ -96,7 +98,6 @@ class TripleBarrierCalculator:
                 if upper_barrier_check:
                     barrier = 'upper'
                     barrier_bar = _ref_df.index[np.argmax((_ref_df['High'] > row['upper_barrier']).values)]
-                    print(_ref_df.index)
                     close_position = row['upper_barrier']
             df_temp_triple_barrier_details.loc[date_index, 'barrier_type'] = barrier
             df_temp_triple_barrier_details.loc[date_index, 'barrier_bar'] = barrier_bar

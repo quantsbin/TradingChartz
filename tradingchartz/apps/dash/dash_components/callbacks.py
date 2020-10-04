@@ -15,6 +15,7 @@ import tradingchartz.apps.dash.helpers.helper_functions as hf
 import tradingchartz.apps.dash.dash_components.charts_and_tables as cts
 from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
 from tradingchartz.src.signal_generator import SignalGenerator
+from tradingchartz.src.backtesting.triple_barrier import TripleBarrierCalculator
 
 
 def register_main_page_callbacks(app: Any) -> Any:
