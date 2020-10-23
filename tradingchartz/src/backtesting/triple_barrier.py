@@ -1,6 +1,7 @@
 # import standard
 import pandas as pd
 import numpy as np
+import datetime as dt
 
 from typing import Tuple
 
@@ -24,6 +25,7 @@ class TripleBarrierCalculator:
     All returns are calculated based on entry point field which is open price of next bar from signal bar as default.
     Reco: Instead of fixing the barrier level %, we can dynamically determine it as multiple of average true range on
     signal day.
+    Both entry point and price_move_field is calculated based on bar following th e signal bar.
     """
     def __init__(self,
                  triple_barrier: TripleBarrierSetter,
@@ -84,6 +86,8 @@ class TripleBarrierCalculator:
                     _ref_df = self.df_OHLCV.iloc[_signal_loc + 1:, :]
             else:
                 _ref_df = self.df_OHLCV.iloc[_signal_loc + 1:, :]
+            if len(_ref_df['Close']) == 0:
+                continue
             close_position = _ref_df.iloc[-1]['Close']
             if self.triple_barrier.lower:
                 # barrier check
@@ -99,9 +103,18 @@ class TripleBarrierCalculator:
                     barrier = 'upper'
                     barrier_bar = _ref_df.index[np.argmax((_ref_df['High'] > row['upper_barrier']).values)]
                     close_position = row['upper_barrier']
+            vol_value = self.df_OHLCV.loc[date_index, 'Vol']
+            avg_vol_value = self.df_OHLCV.iloc[_signal_loc-10:_signal_loc, self.df_OHLCV.columns.get_loc('Vol')].mean()
+
             df_temp_triple_barrier_details.loc[date_index, 'barrier_type'] = barrier
             df_temp_triple_barrier_details.loc[date_index, 'barrier_bar'] = barrier_bar
             df_temp_triple_barrier_details.loc[date_index, 'close_level'] = close_position
+            df_temp_triple_barrier_details.loc[date_index, 'Vol'] = vol_value
+            df_temp_triple_barrier_details.loc[date_index, 'preceding_10day_avg'] = avg_vol_value
+
+            if barrier_bar:
+                barrier_bar_loc = self.df_OHLCV.index.get_loc(barrier_bar)
+                df_temp_triple_barrier_details.loc[date_index, 'holding_period_td'] = barrier_bar_loc - _signal_loc
 
         return df_temp_triple_barrier_details
 
