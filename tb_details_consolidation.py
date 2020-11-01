@@ -19,6 +19,6 @@ for column_name in df.columns:
             df.loc[index_value, column_name] = np.nan
         else:
             temp_df = pd.read_csv(os.path.join(DIRECTORY, file_name))
-            df.loc[index_value, column_name] = temp_df[temp_df['barrier_type']==column_name.split('_')[1]]['holding_period_td'].mean()
+            df.loc[index_value, column_name] = temp_df[temp_df['barrier_type'] == column_name.split('_')[1]]['holding_period_td'].mean()
 
 df.to_csv('holding_period.csv')

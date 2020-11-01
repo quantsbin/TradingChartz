@@ -134,6 +134,3 @@ tb_summary_df.to_csv(r"tb_summary_with_ATR3.csv")
 
 
 
-
-
-
