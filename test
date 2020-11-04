@@ -68,7 +68,7 @@ print(signal_df)
 signal_summary_df = pd.DataFrame(index=csv_data_retriver.available_tickers)
 print(signal_summary_df)
 
-triple_barrier = TripleBarrierSetter(6, 3, 65, 'ATR')
+triple_barrier = TripleBarrierSetter(5, 1, 65, 'preceding_low_adj')
 buffer_value= 0
 print(triple_barrier)
 # triple_test = TripleBarrierCalculator(triple_barrier,
@@ -81,10 +81,11 @@ for candle in candle_names:
     for i, ticker in enumerate(csv_data_retriver.available_tickers):
         # print(ticker)
         df = csv_data_retriver.get_OHLCv_data(ticker)
-        temp_df_atr = talib.ATR(df['High'], df['Low'], df['Close'], timeperiod=10).fillna(method='bfill')
-        df['ATR'] = temp_df_atr
-
-        # df['preceding_low_adj'] = df['Close'] - (1-buffer_value)*df['Low_0_1']
+        # temp_df_atr = talib.ATR(df['High'], df['Low'], df['Close'], timeperiod=10).fillna(method='bfill')
+        # df['ATR'] = temp_df_atr
+        df['Low_1'] = df['Low'].shift(1)
+        df['Low_0_1'] = df[['Low_1', 'Low']].min(axis=1)
+        df['preceding_low_adj'] = df['Close'] - (1-buffer_value)*df['Low_0_1']
         signal_sr = getattr(talib, candle)(df[f"Open"],
                                            df[f"High"],
                                            df[f"Low"],
@@ -127,9 +128,9 @@ if tb_candle_consolidation_list:
     # signal_df.to_csv(f"Signal_Files_updated/{candle}_output.csv")
 
 
-candle_tb_details.to_csv('TB_Analysis_detailed_with_ATR3.csv')
+candle_tb_details.to_csv('TB_Analysis_detailed_with_5.csv')
 
-tb_summary_df.to_csv(r"tb_summary_with_ATR3.csv")
+tb_summary_df.to_csv(r"tb_summary_with_5.csv")
 # signal_summary_df.to_csv(r"signal_summary.csv")
 
 

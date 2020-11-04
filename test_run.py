@@ -5,8 +5,8 @@ import talib
 csv_data_retriver = BBGcsvData(file_path='OHLCv_8_Oct_2020.csv')
 ticker_list = csv_data_retriver.available_tickers
 ticker_list.sort()
-ohlcv = csv_data_retriver.get_OHLCv_data(ticker='HDFCAMC')
-ohlcv.to_csv("HDFCAMC.csv")
+ohlcv = csv_data_retriver.get_OHLCv_data(ticker='AXSB')
+ohlcv.to_csv("AXSB.csv")
 
 macd_output_list = []
 name = 'BBANDS'
