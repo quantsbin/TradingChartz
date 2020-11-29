@@ -1,14 +1,15 @@
 from nsepy import get_history
 from datetime import date, timedelta
 import pandas as pd
+import numpy as np
 
 # from tradingchartz.src.data_sourcing.nsepy_data import NSEPyData
 from tradingchartz.src.data_sourcing.csv_data import BBGcsvData
 from tradingchartz.src.backtesting.triple_barrier import TripleBarrier, TripleBarrierCalculator, TripleBarrierSetter
 
 # end_day = date.today()
-# start_day = end_day - timedelta(1250)
-#
+# start_day = end_day - timedelta(10)
+
 # csv_data_retriver = BBGcsvData(file_path='OHLCv.csv')
 # print(csv_data_retriver.available_tickers)
 # print(csv_data_retriver.get_OHLCv_data(ticker='EIM'))
@@ -18,7 +19,7 @@ from tradingchartz.src.backtesting.triple_barrier import TripleBarrier, TripleBa
 #                                                     start_date=start_day,
 #                                                     end_date=end_day)
 #         return df
-# # print()
+# print(nse_stock())
 #
 # # print(NSEPyData.get_symbol_list('index')['Codes'].to_list())
 #
@@ -54,11 +55,12 @@ print(help(talib.CDLDOJI))
 # print(triple_test.get_triple_barrier_summary(triple_test.df_triple_barrier_details))
 #
 #
-csv_data_retriver = BBGcsvData(file_path='OHLCv_8_Oct_2020.csv')
+csv_data_retriver = BBGcsvData(file_path='OHLCv_6_Nov_2020_10y.csv')
 # print(csv_data_retriver.available_tickers)
 # print(csv_data_retriver.get_OHLCv_data(ticker='EIM'))
 
 candle_names = talib.get_function_groups()['Pattern Recognition']
+# candle_names = ['CDL3INSIDE']
 print(candle_names)
 print(csv_data_retriver)
 print(csv_data_retriver.raw_data)
@@ -68,7 +70,7 @@ print(signal_df)
 signal_summary_df = pd.DataFrame(index=csv_data_retriver.available_tickers)
 print(signal_summary_df)
 
-triple_barrier = TripleBarrierSetter(5, 1, 65, 'preceding_low_adj')
+triple_barrier = TripleBarrierSetter(2, 65, 'preceding_low_adj', .02, .05)
 buffer_value= 0
 print(triple_barrier)
 # triple_test = TripleBarrierCalculator(triple_barrier,
@@ -76,11 +78,14 @@ print(triple_barrier)
 #                                       output)
 tb_candle_consolidation_list = []
 tb_summary_df = pd.DataFrame(index=csv_data_retriver.available_tickers)
+# candle_names = ['CDL3INSIDE']
 for candle in candle_names:
     signal_df = pd.DataFrame(index=csv_data_retriver.raw_data.index)
     for i, ticker in enumerate(csv_data_retriver.available_tickers):
         # print(ticker)
         df = csv_data_retriver.get_OHLCv_data(ticker)
+        if df.empty:
+            continue
         # temp_df_atr = talib.ATR(df['High'], df['Low'], df['Close'], timeperiod=10).fillna(method='bfill')
         # df['ATR'] = temp_df_atr
         df['Low_1'] = df['Low'].shift(1)
@@ -91,7 +96,7 @@ for candle in candle_names:
                                            df[f"Low"],
                                            df[f"Close"])
         signal_df[ticker] = signal_sr
-        signal_summary_df.loc[ticker, f'Total_{candle}'] =  len(signal_df[~(signal_df[ticker].values == 0)])
+        signal_summary_df.loc[ticker, f'Total_{candle}'] = len(signal_df[~(signal_df[ticker].values == 0)])
         signal_summary_df.loc[ticker, f'Positive_{candle}'] = len(signal_df[(signal_df[ticker].values > 0)])
         signal_summary_df.loc[ticker, f'Negative_{candle}'] = len(signal_df[(signal_df[ticker].values < 0)])
         signal_sr = signal_sr[(signal_sr.values > 0)]
@@ -128,9 +133,9 @@ if tb_candle_consolidation_list:
     # signal_df.to_csv(f"Signal_Files_updated/{candle}_output.csv")
 
 
-candle_tb_details.to_csv('TB_Analysis_detailed_with_5.csv')
+candle_tb_details.to_csv('TB_Analysis_detailed_with_2_10.csv')
 
-tb_summary_df.to_csv(r"tb_summary_with_5.csv")
+# tb_summary_df.to_csv(r"tb_summary_with_test1.csv")
 # signal_summary_df.to_csv(r"signal_summary.csv")
 
 

@@ -39,7 +39,7 @@ class BBGcsvData:
 
     def get_OHLCv_data(self, ticker: str) -> pd.DataFrame:
         ohlcv_df = self.raw_data[[f"{ticker}_{field}" for field in self.HEADERS]]
-        ohlcv_df.dropna(how='all', inplace=True)
+        ohlcv_df.dropna(how='any', inplace=True)
         ohlcv_df.columns = self.HEADERS
         return ohlcv_df
 

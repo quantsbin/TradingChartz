@@ -46,10 +46,10 @@ layout_top_bars = dbc.Col(
                             dbc.Label("Select Date-Range", className="mr-2"),
                             dcc.DatePickerRange(
                                 id='stock-data-date-range',
-                                start_date_placeholder_text='Start Date',
                                 start_date=de.DEFAULT_START_DATE,
                                 end_date=de.DEFAULT_END_DATE,
                                 max_date_allowed=dt.date.today(),
+                                with_portal=True,
                                 day_size=30
                             )
                         ],
@@ -96,7 +96,7 @@ layout_main_charting_body = dbc.Card(
         dbc.Spinner(html.Div("Stock Name and other information", id='main-chart-header'))
         , id='chart-underlying-header'
         ),
-     dbc.CardBody([dcc.Graph(id='stock-ohlc-chart')])
+     dbc.CardBody(dcc.Graph(id='stock-ohlc-chart'))
      ], className="w-100")
 
 

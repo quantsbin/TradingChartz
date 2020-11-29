@@ -51,17 +51,25 @@ class TripleBarrierCalculator:
         df_temp_signal = self.sr_signal.to_frame(name='signals')
         df_temp_signal['entry_price'] = self.df_OHLCV.loc[self.df_OHLCV.index,
                                                           DEFAULT_TB_CONFIG.entry_point_field]
-        df_temp_signal[self.triple_barrier.price_move_field] = self.df_OHLCV.loc[df_temp_signal.index,
-                                                                            self.triple_barrier.price_move_field]
+        df_temp_signal[self.triple_barrier.lower_barrier_field] = self.df_OHLCV.loc[df_temp_signal.index,
+                                                                            self.triple_barrier.lower_barrier_field]
+        # Checking floor
+        if self.triple_barrier.lower_min:
+            df_temp_signal[self.triple_barrier.lower_barrier_field] = np.maximum(df_temp_signal[self.triple_barrier.lower_barrier_field],
+                                                                              self.triple_barrier.lower_min * df_temp_signal['entry_price'])
+        if self.triple_barrier.lower_max:
+            df_temp_signal[self.triple_barrier.lower_barrier_field] = np.minimum(df_temp_signal[self.triple_barrier.lower_barrier_field],
+                                                                              self.triple_barrier.lower_max * df_temp_signal['entry_price'])
+
         # Barrier level calculations
-        if self.triple_barrier.lower:
+        if True:
             df_temp_signal['lower_barrier'] = df_temp_signal['entry_price'] \
-                                                  - (df_temp_signal[self.triple_barrier.price_move_field] *
-                                                     self.triple_barrier.lower)
-        if self.triple_barrier.upper:
+                                                  - (df_temp_signal[self.triple_barrier.lower_barrier_field])
+
+        if self.triple_barrier.ratio:
             df_temp_signal['upper_barrier'] = df_temp_signal['entry_price'] \
-                                                  + (df_temp_signal[self.triple_barrier.price_move_field] *
-                                                     self.triple_barrier.upper)
+                                                  + (df_temp_signal[self.triple_barrier.lower_barrier_field] *
+                                                     self.triple_barrier.ratio)
         if self.triple_barrier.vertical:
             df_temp_signal['vertical_barrier'] = self.df_OHLCV.shift(-self.triple_barrier.vertical).loc[
                 df_temp_signal.index, 'Close']
@@ -77,6 +85,7 @@ class TripleBarrierCalculator:
             _signal_loc = self.df_OHLCV.index.get_loc(date_index)
             barrier = None
             barrier_bar = None
+            max_level = None
             if self.triple_barrier.vertical:
                 if (_signal_loc + self.triple_barrier.vertical) < len(self.df_OHLCV.index):
                     _ref_df = self.df_OHLCV.iloc[_signal_loc + 1: _signal_loc + self.triple_barrier.vertical, :]
@@ -86,10 +95,11 @@ class TripleBarrierCalculator:
                     _ref_df = self.df_OHLCV.iloc[_signal_loc + 1:, :]
             else:
                 _ref_df = self.df_OHLCV.iloc[_signal_loc + 1:, :]
+            max_level = _ref_df['High'].max()
             if len(_ref_df['Close']) == 0:
                 continue
             close_position = _ref_df.iloc[-1]['Close']
-            if self.triple_barrier.lower:
+            if True:
                 # barrier check
                 lower_barrier_check = any((_ref_df['Low'] < row['lower_barrier']).values) #Low to cLose
                 if lower_barrier_check:
@@ -97,12 +107,14 @@ class TripleBarrierCalculator:
                     _ref_df = _ref_df.iloc[:np.argmax((_ref_df['Low'] < row['lower_barrier']).values) + 1, :] # Low to cLose
                     barrier_bar = _ref_df.index[-1]
                     close_position = row['lower_barrier']  # _ref_df.loc[barrier_bar, "Close"]
-            if self.triple_barrier.upper:
+                    max_level = _ref_df['High'].iloc[:-1].max()
+            if self.triple_barrier.ratio:
                 upper_barrier_check = any((_ref_df['High'] > row['upper_barrier']).values) #High to close
                 if upper_barrier_check:
                     barrier = 'upper'
                     barrier_bar = _ref_df.index[np.argmax((_ref_df['High'] > row['upper_barrier']).values)] # High to CLose
                     close_position = row['upper_barrier']  # _ref_df.loc[barrier_bar, "Close"]
+                    max_level = close_position
             vol_value = self.df_OHLCV.loc[date_index, 'Vol']
             avg_vol_value = self.df_OHLCV.iloc[_signal_loc-10:_signal_loc, self.df_OHLCV.columns.get_loc('Vol')].mean()
 
@@ -111,11 +123,13 @@ class TripleBarrierCalculator:
             df_temp_triple_barrier_details.loc[date_index, 'close_level'] = close_position
             df_temp_triple_barrier_details.loc[date_index, 'Vol'] = vol_value
             df_temp_triple_barrier_details.loc[date_index, 'preceding_10day_avg'] = avg_vol_value
+            df_temp_triple_barrier_details.loc[date_index, 'max_level'] = max_level
 
             if barrier_bar:
                 barrier_bar_loc = self.df_OHLCV.index.get_loc(barrier_bar)
-                df_temp_triple_barrier_details.loc[date_index, 'holding_period_td'] = barrier_bar_loc - _signal_loc
+                df_temp_triple_barrier_details.loc[date_index, 'holding_period_tb'] = barrier_bar_loc - _signal_loc
                 df_temp_triple_barrier_details.loc[date_index, 'holding_period_return'] = (close_position/df_temp_triple_barrier_details.loc[date_index,'entry_price'])-1
+
         return df_temp_triple_barrier_details
 
     @staticmethod

@@ -71,3 +71,19 @@ class NSEPyData(object):
                                            start_date,
                                            end_date)
 
+    @staticmethod
+    def historical_index_close_levels(symbol: str,
+                                      start_date: dt.date,
+                                      end_date: dt.date = dt.date.today()) -> pd.DataFrame:
+        """
+
+        :param symbol:
+        :param start_date:
+        :param end_date:
+        :return:
+        """
+        NSEPyData()
+        return NSEPyData.nsepy.get_history(symbol,
+                                           start_date,
+                                           end_date,
+                                           index=True)

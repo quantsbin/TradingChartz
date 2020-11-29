@@ -3,6 +3,7 @@ import datetime as dt
 import pandas as pd
 
 from typing import Any, List, Tuple
+from pandas_datareader import get_data_yahoo as data
 
 # dash imports
 import dash
@@ -50,9 +51,11 @@ def register_main_page_callbacks(app: Any) -> Any:
                          end_date: str) -> Tuple:
         if (start_date is None) or (end_date is None) or (stock_symbol is None) or (stock_mapping is None):
             raise PreventUpdate
-        start_date = hf.string_to_date(start_date)
-        end_date = hf.string_to_date(end_date)
-        df = NSEPyData.historical_stock_close_price(stock_symbol, start_date, end_date)
+        # start_date = hf.string_to_date(start_date)
+        # end_date = hf.string_to_date(end_date)
+        df = data(stock_symbol+'.NS', start_date, end_date)
+        df = df.round(2)
+        # df = NSEPyData.historical_stock_close_price(stock_symbol, start_date, end_date)
         stock_name = [mapping['label'] for mapping in stock_mapping if mapping['value'] == stock_symbol]
         chart_header_msg = f"{stock_name[0]} - {stock_symbol}"
         return df.to_json(orient='index', date_format='iso'), chart_header_msg
@@ -96,9 +99,10 @@ def register_main_page_callbacks(app: Any) -> Any:
         stock_ohlcv_df = hf.df_from_jason(stock_ohlcv_data)
         stock_pattern_df = hf.df_from_jason(stock_pattern_data)
         fig = go.Figure()
+        fig = cts.generate_ohlc_graph(fig, stock_ohlcv_df)
         if not stock_pattern_df.empty:
             fig = cts.add_signals_to_chart(fig, stock_pattern_df, stock_ohlcv_df)
-        fig = cts.generate_ohlc_graph(fig, stock_ohlcv_df)
+        fig.update_xaxes(type='category')
         return fig
 
     @app.callback(
