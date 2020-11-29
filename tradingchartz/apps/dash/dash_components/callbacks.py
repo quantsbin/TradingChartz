@@ -1,6 +1,8 @@
 # external standard
 import datetime as dt
 import pandas as pd
+import os, tradingchartz
+
 
 from typing import Any, List, Tuple
 from pandas_datareader import get_data_yahoo as data
@@ -28,7 +30,8 @@ def register_main_page_callbacks(app: Any) -> Any:
         ]
     )
     def set_stock_selection_list(universe_symbol: str):
-        index_constituents = NSEPyData.get_index_constituents(universe_symbol)
+        file_path = os.path.join(tradingchartz.__path__[0], 'data', 'NIFTY50_constituents.csv')
+        index_constituents = pd.read_csv(file_path)
         stock_options = [{'label': row['Company Name'],
                           'value': row['Symbol']} for _, row in index_constituents.iterrows()]
         return stock_options
