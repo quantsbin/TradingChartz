@@ -1,5 +1,5 @@
 pandas
-pandas_datareader
+pandas-datareader
 dash
 dash_bootstrap_components
 dash_html_components
