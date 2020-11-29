@@ -7,4 +7,5 @@ plotly
 nsepy
 nsetools
 gunicorn
+dataclasses
 
