@@ -72,6 +72,8 @@ def register_main_page_callbacks(app: Any) -> Any:
     )
     def calculate_pattern_signals(stock_ohlcv_data: str,
                                   pattern_list: List) -> str:
+        if not stock_ohlcv_data:
+            raise PreventUpdate
         stock_ohlcv_df = hf.df_from_jason(stock_ohlcv_data)
         empty_json = pd.DataFrame().to_json(orient='index')
         if pattern_list is None:

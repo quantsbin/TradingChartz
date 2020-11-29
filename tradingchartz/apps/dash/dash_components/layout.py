@@ -34,7 +34,7 @@ layout_top_bars = dbc.Col(
                         [
                             dbc.Label("Select Stock", className="mr-2"),
                             dcc.Dropdown(id='selected-stock-dropdown',
-                                         value="State bank of India",
+                                         value="SBIN",
                                          placeholder="Select Stock"),
                         ],
                         className="mr-3"
