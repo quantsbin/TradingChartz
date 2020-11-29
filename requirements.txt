@@ -1,4 +1,5 @@
 pandas
+pandas_datareader
 dash
 dash_bootstrap_components
 dash_html_components
@@ -6,5 +7,4 @@ plotly
 nsepy
 nsetools
 gunicorn
-TA-Lib
 
