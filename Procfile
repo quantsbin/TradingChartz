@@ -1,1 +1,1 @@
-web: gunicorn tradingchartz.apps.dash.app:server
+web: gunicorn tradingchartz.app:server
